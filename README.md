@@ -298,8 +298,10 @@ Each release publishes `Herdr-VERSION-x86_64-pc-windows-msvc.zip` and
 Sigstore signatures, and build provenance as the other assets, but they are not
 Authenticode-signed, so SmartScreen warns on first launch, and they never update
 themselves: rerun the [install script](#windows-experimental) or download each
-new release manually. The executable is
-console-subsystem, so launching it from Explorer also opens a console window.
+new release manually. The release executable is a GUI program, so launching it
+opens no console window; typed into a terminal by hand, `--help` and
+`--build-info` print only when their output is piped (see
+[the GUI README](crates/herdr-gpui/README.md#windows)).
 
 ## How it connects
 

@@ -19,6 +19,7 @@ mod limits;
 mod local_network;
 mod method;
 mod options;
+mod process;
 mod queue;
 mod remote_host;
 mod script;
@@ -62,6 +63,9 @@ pub use host_theme::HostTheme;
 pub use local_network::{LocalNetworkAccess, local_network_access, wait_for_local_network};
 pub use method::Method;
 pub use options::ConnectOptions;
+#[cfg(windows)]
+pub use process::CREATE_NO_WINDOW;
+pub use process::background_command;
 pub use remote_host::RemoteHost;
 pub use script::{ScriptHost, ScriptLimits, run_script, run_script_command, shell_quote};
 pub use sessions::{

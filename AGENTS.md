@@ -130,6 +130,7 @@ agents in Herdr panes can use what only this client shows or keeps
 - Keep glyph visibility separate from decorations: spaces and wide-character continuation cells may still need underline/strikethrough painting.
 - Preserve menu input isolation, focus behavior, Unicode composition, and semantic input routing. Do not synthesize terminal keys for operations with endpoint API methods.
 - Activity indicators come from the daemon's snapshot, not guessed terminal output or a client-local seen ledger. Every client shows the same dot; do not reintroduce per-client acknowledgement without asking.
+- Start child processes with `herdr_client::background_command`, never `Command::new`. The Windows release app is a GUI-subsystem program with no console for children to share, so any other console child flashes a window of its own.
 
 ## Protocol And Safety
 

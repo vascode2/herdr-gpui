@@ -3695,6 +3695,18 @@ Starting a local `herdr server` looks for `herdr.exe` and uses
 `CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW` in place of `process_group(0)`, so
 the daemon survives the GUI and no console window appears.
 
+The release executable is a GUI-subsystem program (debug builds keep a console
+for their logs), so launching it opens no console window. With no console of
+its own for children to share, every console program it starts (`git`, `gh`,
+`ssh`, `sh`, the `herdr` CLI) would flash a window of its own, so each is built
+with `herdr_client::background_command`, which adds `CREATE_NO_WINDOW`. Start
+new children the same way, never with `Command::new`. Typed into a terminal by
+hand, a GUI program has no console to print to, and the shell does not wait
+for it, so `--help` and `--build-info` print only when their output is piped,
+as in `herdr-gpui --help | Out-String`; scripts that capture output are
+unaffected. The commands for the running app need a Unix socket and are
+unavailable on Windows regardless.
+
 Cross type-check it from a Mac or Linux machine with `just lint-windows`, which
 targets `x86_64-pc-windows-gnu` because those hosts cannot supply the MSVC C
 toolchain; CI lints the MSVC target on a Windows runner. `just lint-linux` is

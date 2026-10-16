@@ -1,6 +1,9 @@
 // objc 0.2's selectors expand a legacy cargo-clippy cfg in the native test adapter.
 #![cfg_attr(feature = "integration-test", allow(unexpected_cfgs))]
-// A GUI program: the release binary must not open a console window on Windows.
+// A GUI program: the release binary opens no console window on Windows. With
+// no console for children to share, start them with
+// `herdr_client::background_command`, never `Command::new`, or each one
+// flashes a console window of its own.
 #![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
 mod about;
