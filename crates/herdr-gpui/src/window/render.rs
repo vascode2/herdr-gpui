@@ -411,6 +411,7 @@ impl Render for HerdrWindow {
                                         cell_width_px: cell_width.round().max(1.) as u32,
                                         cell_height_px: cell_height.round().max(1.) as u32,
                                     };
+                                    this.terminal_measured = true;
                                     this.resize();
                                 });
                             },

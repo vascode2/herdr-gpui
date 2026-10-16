@@ -35,6 +35,7 @@ mod input_settings;
 mod install_prompt;
 mod keyboard;
 mod link_clicks;
+mod measured_activation;
 mod mouse_cell_motion;
 mod mouse_frame_gap;
 mod mouse_gestures;

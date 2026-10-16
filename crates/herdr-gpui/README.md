@@ -3532,7 +3532,10 @@ Ctrl+Shift+U is left unbound for
 - Cmd-V sends semantic Paste; Cmd-Q or window close detaches without killing
   the daemon or its terminals. Window activation is reported to the daemon.
 - Resize uses the actual terminal canvas bounds and measured configured font cell width,
-  excluding the native sidebar, tabs and status bar.
+  excluding the native sidebar, tabs and status bar. A window connects before its
+  first layout, so it starts without a surface and asks for one only once the
+  terminal is measured: the daemon's panes are sized once, at the window's real
+  size, rather than to a placeholder first and redrawn again.
 - Semantic daemon notifications appear as nonmodal, host-labeled in-app toasts,
   when enabled, including from background endpoints, without changing focus or
   selection. A window-wide scheduler orders arrivals across coalesced host inboxes,

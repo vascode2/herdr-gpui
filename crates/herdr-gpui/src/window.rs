@@ -142,6 +142,10 @@ pub(crate) struct HerdrWindow {
     pub(crate) options: ConnectOptions,
     pub(crate) last_queued_options: Option<ConnectOptions>,
     pub(crate) pending_resize: Option<(ConnectOptions, std::time::Instant)>,
+    /// Whether layout has measured the terminal. Until then `options` is a
+    /// placeholder, and sending it would resize every shown pane only for
+    /// the measured size to follow: each program in them redraws twice.
+    pub(crate) terminal_measured: bool,
     pub(crate) active: bool,
     pub(crate) sent_focus: Option<bool>,
     pub(crate) bounds: Bounds<Pixels>,
@@ -697,6 +701,7 @@ impl HerdrWindow {
             options: ConnectOptions::default(),
             last_queued_options: None,
             pending_resize: None,
+            terminal_measured: false,
             active: window.is_window_active(),
             sent_focus: None,
             bounds: Bounds::default(),

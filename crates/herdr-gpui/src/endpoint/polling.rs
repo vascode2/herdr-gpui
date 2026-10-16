@@ -94,7 +94,10 @@ impl HerdrWindow {
                 && endpoint.connection.handle.is_none()
                 && Instant::now() >= endpoint.retry_at
             {
-                endpoint.connect(self.options, index == 0 && self.selected_endpoint == 0);
+                endpoint.connect(
+                    self.options,
+                    index == 0 && self.selected_endpoint == 0 && self.terminal_measured,
+                );
                 selected_changed |= index == self.selected_endpoint;
                 changed = Redraw::Window;
             }
@@ -136,12 +139,13 @@ impl HerdrWindow {
         } else {
             self.presentation.resume();
         }
-        // Activation is timed from the snapshot it needs. An endpoint that is
-        // down or still handshaking is retried in place, never given up for Local.
-        // The handle stops before the disconnect state reaches the inbox, so
-        // `live` can still hold the lost connection's snapshot for a poll; the
-        // outage is recorded as soon as the stop is seen.
-        if (self.live.snapshot.is_none() || endpoint.outage().is_some())
+        // Activation is timed from the snapshot and the measured terminal it
+        // needs. An endpoint that is down or still handshaking is retried in
+        // place, never given up for Local. The handle stops before the
+        // disconnect state reaches the inbox, so `live` can still hold the
+        // lost connection's snapshot for a poll; the outage is recorded as
+        // soon as the stop is seen.
+        if (self.live.snapshot.is_none() || endpoint.outage().is_some() || !self.terminal_measured)
             && let Some(deadline) = &mut self.activation_deadline
         {
             *deadline = Instant::now() + ACTIVATION_TIMEOUT;
@@ -149,6 +153,7 @@ impl HerdrWindow {
         self.pending_releases
             .retain_mut(|release| !release.resolved());
         if !endpoint.initial_surface
+            && self.terminal_measured
             && self.pending_releases.is_empty()
             && let (Some(handle), Some(snapshot)) =
                 (&endpoint.connection.handle, &endpoint.live.snapshot)

@@ -465,7 +465,9 @@ impl HerdrWindow {
         self.install_warning_shown = false;
         self.version_notice_shown = false;
         self.endpoints[index].attempts = 0;
-        self.endpoints[index].connect(self.options, index == 0);
+        // Before layout measures the terminal, connect inactive: polling
+        // activates it with the measured size, so panes are resized once.
+        self.endpoints[index].connect(self.options, index == 0 && self.terminal_measured);
         self.reset_selected(cx);
     }
 

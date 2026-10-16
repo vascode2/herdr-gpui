@@ -563,6 +563,8 @@ pub(crate) fn fixture_window(window: &mut Window, cx: &mut Context<HerdrWindow>)
         options: ConnectOptions::default(),
         last_queued_options: None,
         pending_resize: None,
+        // A laid-out window; tests of the unmeasured start reset this.
+        terminal_measured: true,
         active: false,
         sent_focus: None,
         bounds: Bounds::default(),
