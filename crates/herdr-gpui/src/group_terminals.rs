@@ -482,6 +482,18 @@ impl HerdrWindow {
         parked.presentation.picture(&parked.live)
     }
 
+    /// Whether a terminal picture is holding back a frame captured mid-redraw,
+    /// so the window draws again until it is painted.
+    pub(crate) fn pictures_settling(&self) -> bool {
+        self.presentation.due().is_some()
+            || self
+                .browser
+                .terminals
+                .parked
+                .iter()
+                .any(|parked| parked.presentation.due().is_some())
+    }
+
     /// Whether `group` shows a terminal through a parked connection.
     pub(crate) fn shows_parked_terminal(&self, group: GroupId, cx: &App) -> bool {
         Some(group) != self.primary_group()

@@ -717,6 +717,7 @@ impl Render for HerdrWindow {
             | self.tabs_growing()
             | self.annotations_moving()
             | self.chrome_sliding()
+            | self.pictures_settling()
         {
             window.request_animation_frame();
         }

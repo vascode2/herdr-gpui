@@ -3710,6 +3710,17 @@ as in `herdr-gpui --help | Out-String`; scripts that capture output are
 unaffected. The commands for the running app need a Unix socket and are
 unavailable on Windows regardless.
 
+Windows panes run behind ConPTY, which renders a program's output itself and
+does not pass on its synchronized-output marks (DEC mode 2026), so the daemon
+can project a frame halfway through an agent redrawing its screen: the pane
+flashes its transcript being reprinted, shifted and half drawn. A frame that
+rewrites much of the picture (more than a quarter of its rows, at least five)
+while keeping the size, panes, scroll positions, and popup is therefore
+painted only once it has been the newest frame for 40 ms, and a burst that
+never quiets still shows its newest frame every 100 ms. Typing, cursor
+movement, wheel scrolling, resizes, splits, and popups paint at once, and
+input always follows the newest frame, not the one painted.
+
 Cross type-check it from a Mac or Linux machine with `just lint-windows`, which
 targets `x86_64-pc-windows-gnu` because those hosts cannot supply the MSVC C
 toolchain; CI lints the MSVC target on a Windows runner. `just lint-linux` is

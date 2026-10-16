@@ -19,6 +19,12 @@
 //! aim a click or a keystroke at a pane the client has already left. A pane
 //! drawn mid-row after a wheel scroll (`smooth_scroll`) is the one exception:
 //! hit testing and IME placement follow its offset, since that is what shows.
+//!
+//! On Windows, what is painted can also trail `live` briefly on purpose: a
+//! frame captured halfway through a program's redraw is held back until it
+//! settles (see [`settle`]). Input keeps reading `live` meanwhile.
+
+mod settle;
 
 use crate::{smooth_scroll::SmoothScroll, state::LiveState};
 use herdr_client::{SurfaceImages, protocol::PaneSurfaceFrame};
@@ -46,6 +52,8 @@ pub(crate) struct Presentation {
     /// The endpoint is down, so any surface `live` still holds, or that the
     /// lost connection delivered late, is the lost connection's too.
     held: bool,
+    /// A frame that rewrites the screen waits here until it settles.
+    settle: settle::Settle,
     #[cfg(feature = "integration-test")]
     pub(crate) probe: Probe,
 }
@@ -136,15 +144,40 @@ impl Presentation {
         self.scroll.clear();
         self.stale = false;
         self.held = false;
+        self.settle.clear();
     }
 
-    /// The frame to paint now, as `frame` chooses it, with its images.
+    /// The frame to paint now, as `frame` chooses it, with its images. A frame
+    /// that rewrites the presented one in place waits until it settles, and
+    /// the presented frame stays up meanwhile.
     pub(crate) fn picture(&mut self, live: &LiveState) -> Option<Picture> {
-        let frame = self.frame(live)?;
+        self.picture_at(live, Instant::now())
+    }
+
+    fn picture_at(&mut self, live: &LiveState, now: Instant) -> Option<Picture> {
+        let ready = live.surface.as_ref().filter(|_| live.surface_ready());
+        // Only ConPTY drops synchronized output; elsewhere the daemon's frames
+        // are whole redraws already. A dimmed stale picture gives way to any
+        // current frame at once.
+        let held = cfg!(windows)
+            && !self.stale
+            && ready.is_some_and(|ready| !self.settle.admit(self.presented.as_ref(), ready, now));
+        let frame = if held {
+            self.presented.clone()?
+        } else {
+            self.settle.clear();
+            self.frame(live)?
+        };
         Some(Picture {
             frame,
             images: self.images.clone(),
         })
+    }
+
+    /// When a held frame is due to be painted, so the window draws again by
+    /// then even if nothing else changes.
+    pub(crate) fn due(&self) -> Option<Instant> {
+        self.settle.due()
     }
 }
 
