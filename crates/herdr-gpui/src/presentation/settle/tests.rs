@@ -108,6 +108,34 @@ fn a_rewrite_that_stands_is_shown_once_quiet() {
     assert!(settle.admit(Some(&shown), &cleared, now + QUIET));
 }
 
+/// Once its window was resized, omp redraws through the alternate screen: a
+/// frame of it lands between two frames of the main screen.
+#[test]
+fn an_alternate_screen_frame_between_redraws_never_shows() {
+    let mut settle = Settle::default();
+    let now = Instant::now();
+    let shown = screen("a");
+    let mut alternate = (*screen("m")).clone();
+    alternate.panes[0].alternate_screen_active = true;
+    alternate.panes[0].scroll = Some(PaneSurfaceScrollMetrics {
+        offset_from_bottom: 0,
+        max_offset_from_bottom: 0,
+        viewport_rows: u64::from(HEIGHT),
+    });
+    assert!(!settle.admit(Some(&shown), &Arc::new(alternate), now));
+    let back = frame(
+        |y| {
+            if y == 23 {
+                "new".into()
+            } else {
+                format!("a{y}")
+            }
+        },
+        Some(0),
+    );
+    assert!(settle.admit(Some(&shown), &back, now + Duration::from_millis(16)));
+}
+
 #[test]
 fn a_burst_that_never_quiets_shows_its_newest_frame_within_the_limit() {
     let mut settle = Settle::default();

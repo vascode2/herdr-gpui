@@ -3717,7 +3717,10 @@ flashes its transcript being reprinted, shifted and half drawn. A frame that
 rewrites much of the picture (more than a quarter of its rows, at least five)
 while keeping the size, panes, scroll positions, and popup is therefore
 painted only once it has been the newest frame for 40 ms, and a burst that
-never quiets still shows its newest frame every 100 ms. Typing, cursor
+never quiets still shows its newest frame every 100 ms. That includes a pane
+switching to or from the alternate screen in place: once its window has been
+resized, omp redraws through the alternate screen, and each of those frames
+would otherwise flash between two of the main screen. Typing, cursor
 movement, wheel scrolling, resizes, splits, and popups paint at once, and
 input always follows the newest frame, not the one painted.
 

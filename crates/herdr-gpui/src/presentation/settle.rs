@@ -82,9 +82,11 @@ impl Settle {
 }
 
 /// Whether `next` rewrites much of `shown` in place: the same size, panes,
-/// pane rectangles, scroll positions, screens, and popup, but many changed
-/// rows. That is what a program redrawing its screen produces, and what
-/// ConPTY can deliver half done.
+/// pane rectangles, scroll positions, and popup, but many changed rows. That
+/// is what a program redrawing its screen produces, and what ConPTY can
+/// deliver half done. A switch to or from the alternate screen counts too:
+/// agents such as omp redraw through it, briefly, once the window was
+/// resized, and a pane that stays on it is painted once it has stood.
 fn rewrites(shown: &PaneSurfaceFrame, next: &PaneSurfaceFrame) -> bool {
     let same_layout = shown.boot_id == next.boot_id
         && shown.frame.width == next.frame.width
@@ -94,7 +96,6 @@ fn rewrites(shown: &PaneSurfaceFrame, next: &PaneSurfaceFrame) -> bool {
         && shown.panes.iter().zip(&next.panes).all(|(a, b)| {
             a.pane_id == b.pane_id
                 && a.rect == b.rect
-                && a.alternate_screen_active == b.alternate_screen_active
                 && a.scroll.map(|scroll| scroll.offset_from_bottom)
                     == b.scroll.map(|scroll| scroll.offset_from_bottom)
         });
