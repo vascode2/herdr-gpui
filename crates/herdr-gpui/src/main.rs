@@ -1,5 +1,7 @@
 // objc 0.2's selectors expand a legacy cargo-clippy cfg in the native test adapter.
 #![cfg_attr(feature = "integration-test", allow(unexpected_cfgs))]
+// A GUI program: the release binary must not open a console window on Windows.
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 
 mod about;
 mod actions;
